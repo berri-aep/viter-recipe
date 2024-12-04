@@ -1,14 +1,81 @@
-import React from 'react'
-import ModalWrapper from '../partials/Modals/ModalWrapper'
-import SpinnerButton from '../partials/spinners/SpinnerButton';
-import { ImagePlusIcon, Minus, Plus, X } from 'lucide-react';
-import { InputPhotoUpload } from '@/components/helpers/FormInputs';
-import { StoreContext } from '@/components/store/storeContext';
-import { setIsAdd } from '@/components/store/storeAction';
+import React from "react";
+import ModalWrapper from "../partials/Modals/ModalWrapper";
+import SpinnerButton from "../partials/spinners/SpinnerButton";
+import { ImagePlusIcon, Minus, Plus, X } from "lucide-react";
+import {
+  InputPhotoUpload,
+  InputSelect,
+  InputText,
+  InputTextArea,
+} from "@/components/helpers/FormInputs";
+import { StoreContext } from "@/components/store/storeContext";
+import { setIsAdd } from "@/components/store/storeAction";
+import { Field, FieldArray, Form, Formik } from "formik";
+import * as Yup from "Yup";
+import { queryData } from "@/components/helpers/queryData";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useUploadPhoto from "@/components/custom-hook/useUploadPhoto";
+import { imgPath } from "@/components/helpers/functions-general";
 
-const ModalAddRecipe = () => {
-  const {dispatch} = React.useContext(StoreContext);
+const ModalAddRecipe = ({ itemEdit }) => {
+  const { dispatch } = React.useContext(StoreContext);
   const handleClose = () => dispatch(setIsAdd(false));
+
+  const { uploadPhoto, handleChangePhoto, photo } =
+    useUploadPhoto("/v2/upload-photo");
+
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (values) =>
+      queryData(
+        itemEdit ? `/v2/recipe/${itemEdit.recipe_aid}` : `/v2/recipe`,
+        itemEdit ? "put" : "post",
+        values
+      ),
+    onSuccess: (data) => {
+      // Invalidate and refetch
+      console.log(data);
+      queryClient.invalidateQueries({
+        queryKey: ["recipe"],
+      });
+
+      // show error box
+      if (data.success) {
+        console.log("asd");
+        dispatch(setIsAdd(false));
+        dispatch(setSuccess(true));
+      } else {
+        dispatch(setValidate(true));
+        dispatch(setMessage(data.error));
+      }
+    },
+  });
+
+  const initVal = {
+    recipe_title: itemEdit ? itemEdit.recipe_title : "",
+    recipe_category: itemEdit ? itemEdit.recipe_category : "",
+    recipe_level: itemEdit ? itemEdit.recipe_level : "",
+    recipe_serving: itemEdit ? itemEdit.recipe_serving : "",
+    recipe_prep_time: itemEdit ? itemEdit.recipe_prep_time : "",
+    recipe_description: itemEdit ? itemEdit.recipe_description : "",
+    recipe_instruction: itemEdit ? itemEdit.recipe_instruction : "",
+
+    recipe_title_old: itemEdit ? itemEdit.recipe_title : "",
+
+    recipe_ingredients: itemEdit
+      ? JSON.parse(itemEdit.recipe_ingredients)
+      : [{ ingredients: "", amount: "", unit: "" }],
+  };
+  const yupSchema = Yup.object({
+    recipe_title: Yup.string().required("required"),
+    recipe_category: Yup.string().required("required"),
+    recipe_level: Yup.string().required("required"),
+    recipe_serving: Yup.string().required("required"),
+    recipe_prep_time: Yup.string().required("required"),
+    recipe_description: Yup.string().required("required"),
+    recipe_instruction: Yup.string().required("required"),
+  });
+
   return (
     <ModalWrapper>
       <div className="modal-main bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[1300px] w-full rounded-md border border-line">
@@ -19,150 +86,217 @@ const ModalAddRecipe = () => {
           </button>
         </div>
         <div className="modal-body p-2 py-4">
-          <form action="">
-            <div className="grid grid-cols-[1fr_1.5fr_1.5fr] gap-5">
-              <div className="info">
-                <h3 className="mb-0">Information</h3>
-                <div className="input-wrap relative group input-photo-wrap h-[150px] mb-10">
-                  <label htmlFor="">Photo</label>
-                  {true ? (
-                    <div className="w-full border border-line rounded-md flex justify-center items-center flex-col h-full">
-                      <ImagePlusIcon
-                        size={50}
-                        strokeWidth={1}
-                        className="opacity-20 group-hover:opacity-50 transition-opacity"
-                      />
+          <Formik
+            initialValues={initVal}
+            validationSchema={yupSchema}
+            onSubmit={async (values) => {
+              mutation.mutate({
+                ...values,
+                recipe_image:
+                  (itemEdit?.recipe_image === "" && photo) ||
+                  (!photo && "") ||
+                  (photo === undefined && "") ||
+                  (photo && itemEdit?.recipe_image !== photo?.name)
+                    ? photo?.name || ""
+                    : itemEdit?.recipe_image || "",
+              });
+              uploadPhoto();
+            }}
+          >
+            {(props) => {
+              return (
+                <Form>
+                  <div className="grid grid-cols-[1fr_1.5fr_1.5fr] gap-5">
+                    <div className="info">
+                      <h3 className="mb-0">Information</h3>
+                      <div className="input-wrap relative  group input-photo-wrap h-[150px] ">
+                        {itemEdit === null && photo === null ? (
+                          <div className="w-full  rounded-md flex justify-center items-center flex-col h-full">
+                            <ImagePlusIcon
+                              size={50}
+                              strokeWidth={1}
+                              className="opacity-20 group-hover:opacity-50 transition-opacity"
+                            />
+                            <small className="opacity-20 group-hover:opacity-50 transition-opacity">
+                              Upload Photo
+                            </small>
+                          </div>
+                        ) : (
+                          <img
+                            src={
+                              photo
+                                ? URL.createObjectURL(photo) // preview
+                                : imgPath + "/" + itemEdit?.recipe_image // check db
+                            }
+                            alt="recipe photo"
+                            className={`group-hover:opacity-30 duration-200 relative object-cover h-full w-full  m-auto ${
+                              mutation.isPending
+                                ? "opacity-40 pointer-events-none"
+                                : ""
+                            }`}
+                          />
+                        )}
 
-                      <small className="opacity-20 group-hover:opacity-50 transition-opacity">
-                        Upload Photo
-                      </small>
+                        <InputPhotoUpload
+                          name="photo"
+                          type="file"
+                          id="photo"
+                          accept="image/*"
+                          title="Upload photo"
+                          onChange={(e) => handleChangePhoto(e)}
+                          onDrop={(e) => handleChangePhoto(e)}
+                          className={`opacity-0 absolute top-0 right-0 bottom-0 left-0 rounded-full  m-auto cursor-pointer w-full h-full ${
+                            mutation.isPending ? "pointer-events-none" : ""
+                          }`}
+                        />
+                      </div>
+
+                      <div className="input-wrap">
+                        <InputText
+                          label="Title"
+                          name="recipe_title"
+                          type="text"
+                        />
+                      </div>
+                      <div className="input-wrap">
+                        <InputSelect label="Category" name="recipe_category">
+                          <option value="" hidden>
+                            Select Category
+                          </option>
+                          <option value="Chicken">Chicken</option>
+                          <option value="Pasta">Pasta</option>
+                          <option value="Beef">Beef</option>
+                        </InputSelect>
+                      </div>
+                      <div className="input-wrap">
+                        <InputSelect label="Level" name="recipe_level">
+                          <option value="" hidden>
+                            Select Level
+                          </option>
+                          <option value="Easy">Easy</option>
+                          <option value="Moderate">Moderate</option>
+                          <option value="Difficult">Difficult</option>
+                        </InputSelect>
+                      </div>
+                      <div className="input-wrap">
+                        <InputText
+                          label="Serving"
+                          name="recipe_serving"
+                          type="text"
+                        />
+                      </div>
+                      <div className="input-wrap">
+                        <InputText
+                          label="Prep Time"
+                          name="recipe_prep_time"
+                          type="text"
+                        />
+                      </div>
                     </div>
-                  ) : (
-                    <img
-                      // src={
-                      //   itemEdit === null
-                      //     ? URL.createObjectURL(photo) // preview
-                      //     : imgPath + "/" + itemEdit?.menu_image // check db
-                      // }
-                      alt="employee photo"
-                      className={`group-hover:opacity-30 duration-200 relative object-cover h-full w-full  m-auto `}
-                    />
-                  )}
-                  {/* <InputPhotoUpload
-                    name="photo"
-                    type="file"
-                    id="photo"
-                    accept="image/*"
-                    title="Upload photo"
-                    // onChange={(e) => handleChangePhoto(e)}
-                    // onDrop={(e) => handleChangePhoto(e)}
-                    className={`opacity-0 absolute top-0 right-0 bottom-0 left-0 rounded-full  m-auto cursor-pointer w-full h-full`}
-                  /> */}
-                </div>
-                <div className="input-wrap">
-                  <label htmlFor="">Title</label>
-                  <input type="text" />
-                </div>
-                <div className="input-wrap">
-                  <label htmlFor="">Category</label>
-                  <select name="" id="">
-                    <option value="" hidden>
-                      Select Category
-                    </option>
-                    <option value="Chicken">Chicken</option>
-                    <option value="Pasta">Pasta</option>
-                    <option value="Beef">Beef</option>
-                  </select>
-                </div>
-                <div className="input-wrap">
-                  <label htmlFor="">Level</label>
-                  <select name="" id="">
-                    <option value="" hidden>
-                      Select Level
-                    </option>
-                    <option value="Easy">Easy</option>
-                    <option value="Moderate">Moderate</option>
-                    <option value="Difficult">Difficult</option>
-                  </select>
-                </div>
-                <div className="input-wrap">
-                  <label htmlFor="">Serving</label>
-                  <input type="text" />
-                </div>
-                <div className="input-wrap">
-                  <label htmlFor="">Prep Time</label>
-                  <input type="text" />
-                </div>
-              </div>
 
-              <div className="ingredients ">
-                <div className="input-wrap">
-                  <div className="flex justify-between items-center">
-                    <h3 className="mb-0">Ingredients</h3>
-                    <button className="bg-[#dd8488] text-[#5f2124] p-1 px-2 text-sm rounded-md">
-                      Add
+                    <div className="ingredient">
+                      <FieldArray
+                        name="recipe_ingredients"
+                        render={({ push, remove }) => (
+                          <div className="input-wrap">
+                            <div className="flex justify-between items-center">
+                              <h3 className="mb-0">Ingredients</h3>
+                              <button
+                                className="bg-accent text-[#652427] font-semibold  p-1 px-2 text-sm rounded-md"
+                                onClick={() =>
+                                  push({
+                                    ingredients: "",
+                                    amount: "",
+                                    unit: "",
+                                  })
+                                }
+                                type="button"
+                              >
+                                Add
+                              </button>
+                            </div>
+
+                            <div className="overflow-y-auto custom-scroll max-h-[500px] h-full pr-2">
+                              {props.values.recipe_ingredients.map(
+                                (ingredients, index) => (
+                                  <div
+                                    className="grid grid-cols-[1fr,_.3fr,_.8fr_.2fr] gap-3 mt-3 "
+                                    key={index}
+                                  >
+                                    <div>
+                                      <label htmlFor="">Ingredients</label>
+                                      <Field
+                                        name={`recipe_ingredients[${index}].ingredients`}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label htmlFor="">Amount</label>
+                                      <Field
+                                        name={`recipe_ingredients[${index}].amount`}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label htmlFor="">Unit</label>
+                                      <Field
+                                        name={`recipe_ingredients[${index}].unit`}
+                                      />
+                                    </div>
+
+                                    <button
+                                      className="size-[33px] bg-accent text-white rounded-md center-all self-end"
+                                      onClick={() => remove(index)}
+                                    >
+                                      <Minus />
+                                    </button>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      />
+                    </div>
+
+                    <div className="instruction">
+                      <div className="input-wrap">
+                        <h3>Instruction</h3>
+                        <InputTextArea
+                          name="recipe_instruction"
+                          className="overflow-y-auto custom-scroll !h-[310px] w-full rounded-md p-2 outline-none bg-primary border borderline resize-none text-body"
+                        />
+                      </div>
+                      <div className="input-wrap">
+                        <h3>Description</h3>
+                        <InputTextArea
+                          name="recipe_description"
+                          className="overflow-y-auto custom-scroll !max-h-[120px] h-full w-full rounded-md p-2 outline-none bg-primary border borderline resize-none text-body"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-5">
+                    <button className="btn btn-accent" type="submit">
+                      {mutation.isPending && <SpinnerButton />} {itemEdit ? "Save" : "Add"}
+                    </button>
+                    <button
+                      className="btn btn-cancel"
+                      type="reset"
+                      onClick={handleClose}
+                    >
+                      Cancel
                     </button>
                   </div>
-
-                  <div className="overflow-y-auto custom-scroll max-h-[655px] h-full pr-2">
-                    {Array.from(Array(10).keys()).map((i) => (
-                      <div className="grid grid-cols-[1fr_0.3fr_0.8fr_0.2fr] gap-5 mt-3">
-                        <div>
-                          <label htmlFor="">Ingredients</label>
-                          <input type="text" />
-                        </div>
-
-                        <div>
-                          <label htmlFor="">Amount</label>
-                          <input type="text" />
-                        </div>
-                        <div>
-                          <label htmlFor="">Unit</label>
-                          <select name="" id="">
-                            <option value="">tbs</option>
-                            <option value="">tsp</option>
-                            <option value="">cup</option>
-                            <option value="">oz</option>
-                          </select>
-                        </div>
-
-                        <button className="size-[33px] bg-accent text-white rounded-md center-all self-end">
-                          <Minus />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="instruction">
-                <h3>Instruction</h3>
-                <textarea
-                  name=""
-                  id=""
-                  className="overflow-y-auto custom-scroll max-h-[400px] h-full w-full rounded-md p-2 outline-none bg-primary border borderline resize-none text-body"
-                ></textarea>
-                <h3>Description</h3>
-                <textarea
-                  name=""
-                  id=""
-                  className="overflow-y-auto custom-scroll max-h-[120px] h-full w-full rounded-md p-2 outline-none bg-primary border borderline resize-none text-body"
-                ></textarea>
-              </div>
-            </div>
-          </form>
-
-          <div className="flex justify-end gap-3 mt-5">
-            <button className="btn btn-accent">
-              <SpinnerButton /> Add
-            </button>
-            <button className="btn btn-cancel" onClick={handleClose}>
-              Cancel
-            </button>
-          </div>
+                </Form>
+              );
+            }}
+          </Formik>
         </div>
       </div>
     </ModalWrapper>
   );
-}
+};
 
-export default ModalAddRecipe
+export default ModalAddRecipe;

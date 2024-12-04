@@ -1,15 +1,15 @@
 <?php
 $conn = null;
 $conn = checkDbConnection();
-$question = new Question($conn);
+$recipe = new Recipe($conn);
 // $error = [];
 // $returnData = [];
-if (array_key_exists("questionid", $_GET)) {
-    $question->question_aid = $_GET['questionid'];
-    checkId($question->question_aid);
-    // isAssociated($question);
-    $query = checkDelete($question);
-    returnSuccess($question, "question", $query);
+if (array_key_exists("recipeid", $_GET)) {
+    $recipe->recipe_aid = $_GET['recipeid'];
+    checkId($recipe->recipe_aid);
+    // isAssociated($recipe);
+    $query = checkDelete($recipe);
+    returnSuccess($recipe, "recipe", $query);
 }
 
 checkEndpoint();

@@ -11,9 +11,9 @@ Header set Access-Control-Allow-Origin *
 
 RewriteRule ^upload-photo$ core/upload-photo.php [L]
 
-### Question ###
-RewriteRule ^question$ controllers/developer/question/question.php [L]
-RewriteRule ^question/([0-9]+)$ controllers/developer/question/question.php?questionid=$1 [L]
-RewriteRule ^question/active/([0-9]+)$ controllers/developer/question/active.php?questionid=$1 [L]
-RewriteRule ^question/search$ controllers/developer/question/search.php [L]
-RewriteRule ^question/page/([0-9]+)$ controllers/developer/question/page.php?start=$1 [L]
+### Recipe ###
+RewriteRule ^recipe$ controllers/developer/recipe/recipe.php [L]
+RewriteRule ^recipe/([0-9]+)$ controllers/developer/recipe/recipe.php?recipeid=$1 [L]
+RewriteRule ^recipe/active/([0-9]+)$ controllers/developer/recipe/active.php?recipeid=$1 [L]
+RewriteRule ^recipe/search$ controllers/developer/recipe/search.php [L]
+RewriteRule ^recipe/page/([0-9]+)$ controllers/developer/recipe/page.php?start=$1 [L]

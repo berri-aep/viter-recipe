@@ -1,16 +1,17 @@
 import React from "react";
 import { setError, setMessage } from "../store/storeAction.jsx";
 import { StoreContext } from "../store/storeContext.jsx";
+import { devApiUrl, fetchFormData } from "../helpers/functions-general.jsx";
 
 const useUploadPhoto = (url) => {
   const [photo, setPhoto] = React.useState(null);
   const { dispatch } = React.useContext(StoreContext);
   const uploadPhoto = async () => {
-    // if (photo) {
-    //   const fd = new FormData();
-    //   fd.append("photo", photo);
-    //   const data = await fetchFormData(devApiUrl + url, fd);
-    // }
+    if (photo) {
+      const fd = new FormData();
+      fd.append("photo", photo);
+      const data = await fetchFormData(devApiUrl + url, fd);
+    }
   };
   const handleChangePhoto = (e) => {
     console.log(e.target.files[0]);

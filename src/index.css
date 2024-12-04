@@ -196,7 +196,7 @@
   .input-wrap input,
   .input-wrap textarea,
   .input-wrap select {
-    @apply px-2 py-1 w-full outline-none border border-line bg-primary text-body rounded-md focus:border-info h-[33px];
+    @apply px-2 py-1 w-full outline-none border border-line bg-primary text-body rounded-md focus:border-info ;
   }
 
   .input-wrap input:disabled,

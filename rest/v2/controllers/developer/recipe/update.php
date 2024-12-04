@@ -1,24 +1,31 @@
 <?php
 $conn = null;
 $conn = checkDbConnection();
-$question = new Question($conn);
+$recipe = new Recipe($conn);
 // $error = [];
 // $returnData = [];
-if (array_key_exists("questionid", $_GET)) {
+if (array_key_exists("recipeid", $_GET)) {
     checkPayload($data);
 
-    $question->question_aid = $_GET['questionid'];
-    $question->question_title = checkIndex($data, "question_title");
-    $question->question_choices = json_encode($data["question_choices"]);
+    $recipe->recipe_aid = $_GET['recipeid'];
+    $recipe->recipe_title = checkIndex($data, "recipe_title");
+    $recipe->recipe_category = checkIndex($data, "recipe_category");
+    $recipe->recipe_level = checkIndex($data, "recipe_level");
+    $recipe->recipe_serving = checkIndex($data, "recipe_serving");
+    $recipe->recipe_prep_time = checkIndex($data, "recipe_prep_time");
+    $recipe->recipe_image = checkIndex($data, "recipe_image");
+    $recipe->recipe_ingredients = json_encode($data["recipe_ingredients"]);
+    $recipe->recipe_description = checkIndex($data, "recipe_description");
+    $recipe->recipe_instruction = checkIndex($data, "recipe_instruction");
 
 
-    $question->question_datetime = date("Y-m-d H:i:s");
-    $question_title_old = strtolower($data["question_title_old"]);
-    // checkId($question->question_aid);
-    compareName($question, $question_title_old, $question->question_title);
+    $recipe->recipe_datetime = date("Y-m-d H:i:s");
+    $recipe_title_old = strtolower($data["recipe_title_old"]);
+    // checkId($recipe->recipe_aid);
+    compareName($recipe, $recipe_title_old, $recipe->recipe_title);
 
-    $query = checkUpdate($question);
-    returnSuccess($question, "question", $query);
+    $query = checkUpdate($recipe);
+    returnSuccess($recipe, "recipe", $query);
 }
 
 checkEndpoint();

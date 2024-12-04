@@ -27,7 +27,7 @@ class Recipe
     public function __construct($db)
     {
         $this->connection = $db;
-        $this->tblrecipe = "recipes";
+        $this->tblrecipe = "recipe";
     }
 
     // create
