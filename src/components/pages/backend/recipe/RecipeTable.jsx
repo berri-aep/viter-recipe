@@ -34,6 +34,7 @@ const RecipeTable = ({ setItemEdit }) => {
     "get", // method
     "recipe"
   );
+  
   let counter = 1;
 
   const handleEdit = (item) => {
