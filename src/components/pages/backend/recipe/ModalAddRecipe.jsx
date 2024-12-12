@@ -16,13 +16,41 @@ import { queryData } from "@/components/helpers/queryData";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useUploadPhoto from "@/components/custom-hook/useUploadPhoto";
 import { imgPath } from "@/components/helpers/functions-general";
+import useQueryData from "@/components/custom-hook/useQueryData";
 
 const ModalAddRecipe = ({ itemEdit }) => {
   const { dispatch } = React.useContext(StoreContext);
   const handleClose = () => dispatch(setIsAdd(false));
+    const [value, setValue] = React.useState("");
 
   const { uploadPhoto, handleChangePhoto, photo } =
     useUploadPhoto("/v2/upload-photo");
+
+  const handleChange = (event) => {
+    setValue(event.target.value);
+  };
+
+  const {
+    isFetching,
+    error,
+    data: categ,
+    status,
+  } = useQueryData(
+    `/v2/category`, //endpoint
+    "get", //method
+    "category" //key
+  );
+  
+  const {
+    isFetchingLevel,
+    errorLevel,
+    data: level,
+    LevelStatus,
+  } = useQueryData(
+    `/v2/level`, //endpoint
+    "get", //method
+    "level" //key
+  );
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
@@ -53,14 +81,12 @@ const ModalAddRecipe = ({ itemEdit }) => {
 
   const initVal = {
     recipe_title: itemEdit ? itemEdit.recipe_title : "",
-    recipe_category: itemEdit ? itemEdit.recipe_category : "",
-    recipe_level: itemEdit ? itemEdit.recipe_level : "",
+    recipe_category_id: itemEdit ? itemEdit.recipe_category_id : "",
+    recipe_level_id: itemEdit ? itemEdit.recipe_level_id : "",
     recipe_serving: itemEdit ? itemEdit.recipe_serving : "",
     recipe_prep_time: itemEdit ? itemEdit.recipe_prep_time : "",
     recipe_description: itemEdit ? itemEdit.recipe_description : "",
     recipe_instruction: itemEdit ? itemEdit.recipe_instruction : "",
-
-    recipe_title_old: itemEdit ? itemEdit.recipe_title : "",
 
     recipe_ingredients: itemEdit
       ? JSON.parse(itemEdit.recipe_ingredients)
@@ -68,8 +94,8 @@ const ModalAddRecipe = ({ itemEdit }) => {
   };
   const yupSchema = Yup.object({
     recipe_title: Yup.string().required("required"),
-    recipe_category: Yup.string().required("required"),
-    recipe_level: Yup.string().required("required"),
+    recipe_category_id: Yup.string().required("required"),
+    recipe_level_id: Yup.string().required("required"),
     recipe_serving: Yup.string().required("required"),
     recipe_prep_time: Yup.string().required("required"),
     recipe_description: Yup.string().required("required"),
@@ -159,25 +185,50 @@ const ModalAddRecipe = ({ itemEdit }) => {
                         />
                       </div>
                       <div className="input-wrap">
-                        <InputSelect label="Category" name="recipe_category">
+                        <InputSelect
+                          label="Recipe Category"
+                          name="recipe_category_id"
+                          onChange={handleChange}
+                        >
                           <option value="" hidden>
                             Select Category
                           </option>
-                          <option value="Chicken">Chicken</option>
-                          <option value="Pasta">Pasta</option>
-                          <option value="Beef">Beef</option>
+                          {categ?.data.map((item, key) => {
+                            return (
+                              <>
+                                {item.category_is_active === 1 && (
+                                  <option key={key} value={item.category_aid}>
+                                    {item.category_title}
+                                  </option>
+                                )}
+                              </>
+                            );
+                          })}
                         </InputSelect>
                       </div>
                       <div className="input-wrap">
-                        <InputSelect label="Level" name="recipe_level">
+                        <InputSelect
+                          label="Level"
+                          name="recipe_level_id"
+                          onChange={handleChange}
+                        >
                           <option value="" hidden>
                             Select Level
                           </option>
-                          <option value="Easy">Easy</option>
-                          <option value="Moderate">Moderate</option>
-                          <option value="Difficult">Difficult</option>
+                          {level?.data.map((item, key) => {
+                            return (
+                              <>
+                                {item.level_is_active === 1 && (
+                                  <option key={key} value={item.level_aid}>
+                                    {item.level_title}
+                                  </option>
+                                )}
+                              </>
+                            );
+                          })}
                         </InputSelect>
                       </div>
+
                       <div className="input-wrap">
                         <InputText
                           label="Serving"
@@ -279,7 +330,8 @@ const ModalAddRecipe = ({ itemEdit }) => {
 
                   <div className="flex justify-end gap-3 mt-5">
                     <button className="btn btn-accent" type="submit">
-                      {mutation.isPending && <SpinnerButton />} {itemEdit ? "Save" : "Add"}
+                      {mutation.isPending && <SpinnerButton />}{" "}
+                      {itemEdit ? "Save" : "Add"}
                     </button>
                     <button
                       className="btn btn-cancel"

@@ -62,7 +62,7 @@ const Single = () => {
               <li className="flex gap-2 items-center">
                 <HandPlatter />{" "}
                 {getSingleRecipe() !== undefined &&
-                  getSingleRecipe()[0].recipe_category}
+                  getSingleRecipe()[0].category_title}
               </li>
             </ul>
             <p className="max-w-[600px] mx-auto">

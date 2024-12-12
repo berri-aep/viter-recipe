@@ -43,7 +43,7 @@ const BannerSlider = ({result}) => {
                       <Utensils /> {item.recipe_serving}
                     </li>
                     <li className="flex gap-2 items-center">
-                      <HandPlatter /> {item.recipe_category}
+                      <HandPlatter /> {item.category_title}
                     </li>
                   </ul>
                   <p className="mb-5">{item.recipe_description}</p>

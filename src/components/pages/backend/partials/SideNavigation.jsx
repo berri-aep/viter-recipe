@@ -1,5 +1,5 @@
 import { imgPath } from "@/components/helpers/functions-general";
-import { LayoutDashboard, UtensilsCrossed } from "lucide-react";
+import { AlignStartVertical, Gauge, LayoutDashboard, UtensilsCrossed } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const SideNavigation = ({ menu }) => {
@@ -13,6 +13,16 @@ const SideNavigation = ({ menu }) => {
       title: "Recipe",
       slug: "/admin/recipe",
       icon: <UtensilsCrossed size={20} />,
+    },
+    {
+      title: "Category",
+      slug: "/admin/category",
+      icon: <AlignStartVertical size={20} />,
+    },
+    {
+      title: "Level",
+      slug: "/admin/level",
+      icon: <Gauge size={20} />,
     },
   ];
   return (

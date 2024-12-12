@@ -18,8 +18,10 @@ import IconNoData from "../partials/IconNoData";
 import TableLoader from "../partials/TableLoader";
 import IconServerError from "../partials/IconServerError";
 import SpinnerTable from "../partials/spinners/SpinnerTable";
+import ModalRestore from "@/components/partials/modal/ModalRestore";
+import ModalArchive from "@/components/partials/modal/ModalArchive";
 
-const RecipeTable = ({ setItemEdit }) => {
+const CategoryTable = ({ setItemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
   const [isActive, setIsActive] = React.useState(0);
   const [id, setId] = React.useState(null);
@@ -30,11 +32,11 @@ const RecipeTable = ({ setItemEdit }) => {
     error,
     data: result,
   } = useQueryData(
-    `/v2/recipe`, // endpoint
+    `/v2/category`, // endpoint
     "get", // method
-    "recipe"
+    "category"
   );
-  
+
   let counter = 1;
 
   const handleEdit = (item) => {
@@ -44,18 +46,18 @@ const RecipeTable = ({ setItemEdit }) => {
 
   const handleDelete = (item) => {
     dispatch(setIsDelete(true));
-    setId(item.recipe_aid);
+    setId(item.category_aid);
   };
   const handleRestore = (item) => {
-    dispatch(setIsConfirm(true));
+    dispatch(setIsRestore(true));
     setIsActive(1);
-    setId(item.recipe_aid);
+    setId(item.category_aid);
   };
 
   const handleArchive = (item) => {
-    dispatch(setIsConfirm(true));
+    dispatch(setIsArchive(true));
     setIsActive(0);
-    setId(item.recipe_aid);
+    setId(item.category_aid);
   };
   return (
     <>
@@ -68,8 +70,6 @@ const RecipeTable = ({ setItemEdit }) => {
                 <th>#</th>
                 <th>Status</th>
                 <th>Title</th>
-                <th>Category</th>
-                <th>Level</th>
                 <th></th>
               </tr>
             </thead>
@@ -99,14 +99,12 @@ const RecipeTable = ({ setItemEdit }) => {
                   <tr key={key}>
                     <td>{counter++}.</td>
                     <td>
-                      <Pills isActive={item.recipe_is_active} />
+                      <Pills isActive={item.category_is_active} />
                     </td>
-                    <td>{item.recipe_title}</td>
-                    <td className="capitalize">{item.category_title}</td>
-                    <td className="capitalize">{item.level_title}</td>
+                    <td>{item.category_title}</td>
                     <td>
                       <ul className="table-action">
-                        {item.recipe_is_active ? (
+                        {item.category_is_active ? (
                           <>
                             <li>
                               <button
@@ -122,7 +120,6 @@ const RecipeTable = ({ setItemEdit }) => {
                                 className="tooltip"
                                 data-tooltip="Archive"
                                 onClick={() => handleArchive(item)}
-                                
                               >
                                 <Archive />
                               </button>
@@ -165,27 +162,27 @@ const RecipeTable = ({ setItemEdit }) => {
 
       {store.isDelete && (
         <ModalDelete
-          queryKey="recipe"
-          mysqlApiDelete={`/v2/recipe/${id}`}
-
+          setIsDelete={setIsDelete}
+          queryKey="category"
+          mysqlApiDelete={`/v2/category/${id}`}
         />
       )}
-      {store.isConfirm && (
-        <ModalConfirm
-          queryKey="recipe"
-          mysqlApiArchive={`/v2/recipe/active/${id}`}
-          active={isActive}
+      {store.isRestore && (
+        <ModalRestore
+          setIsRestore={setIsRestore}
+          queryKey="category"
+          mysqlEndpoint={`/v2/category/active/${id}`}
         />
       )}
       {store.isArchive && (
-        <ModalConfirm
-          queryKey="recipe"
-          mysqlApiArchive={`/v2/recipe/active/${id}`}
-          active={isActive}
+        <ModalArchive
+          setIsArchive={setIsArchive}
+          queryKey="category"
+          mysqlEndpoint={`/v2/category/active/${id}`}
         />
       )}
     </>
   );
 };
 
-export default RecipeTable;
+export default CategoryTable;
