@@ -31,12 +31,12 @@ const CategoryTable = ({ setItemEdit }) => {
   const { store, dispatch } = React.useContext(StoreContext);
   const [isActive, setIsActive] = React.useState(0);
   const [id, setId] = React.useState(null);
-    const [isFilter, setIsFilter] = React.useState(false);
-    const [onSearch, setOnSearch] = React.useState(false);
-    const [statusFilter, setStatusFilter] = React.useState("");
-    const search = React.useRef({ value: "" });
-    const [page, setPage] = React.useState(1);
-    const { ref, inView } = useInView();
+  const [isFilter, setIsFilter] = React.useState(false);
+  const [onSearch, setOnSearch] = React.useState(false);
+  const [statusFilter, setStatusFilter] = React.useState("");
+  const search = React.useRef({ value: "" });
+  const [page, setPage] = React.useState(1);
+  const { ref, inView } = useInView();
 
   // const {
   //   isLoading,
