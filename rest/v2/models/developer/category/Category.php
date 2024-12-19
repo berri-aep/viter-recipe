@@ -1,4 +1,6 @@
 <?php
+
+
 class Category
 {
     public $category_aid;
@@ -9,53 +11,27 @@ class Category
 
     public $connection;
     public $lastInsertedId;
-
-    public $tblcategory;
-
     public $category_start;
     public $category_total;
     public $category_search;
 
+    public $tblCategory;
+
+
     public function __construct($db)
     {
         $this->connection = $db;
-        $this->tblcategory = "category";
+        $this->tblCategory = "category";
     }
 
-    // create
-    public function create()
-    {
-        try {
-            $sql = "insert into {$this->tblcategory} ";
-            $sql .= "( category_title, ";
-            $sql .= "category_is_active, ";
-            $sql .= "category_datetime, ";
-            $sql .= "category_created ) values ( ";
-            $sql .= ":category_title, ";
-            $sql .= ":category_is_active, ";
-            $sql .= ":category_datetime, ";
-            $sql .= ":category_created ) ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "category_title" => $this->category_title,
-                "category_is_active" => $this->category_is_active,
-                "category_datetime" => $this->category_datetime,
-                "category_created" => $this->category_created,
-            ]);
-            $this->lastInsertedId = $this->connection->lastInsertId();
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
 
-    // read all
     public function readAll()
     {
         try {
-            $sql = "select * from {$this->tblcategory} ";
+
+            $sql = "select * from {$this->tblCategory} ";
             $sql .= "order by category_is_active desc, ";
-            $sql .= "category_title asc ";
+            $sql .= "category_title ";
             $query = $this->connection->query($sql);
         } catch (PDOException $ex) {
             $query = false;
@@ -63,13 +39,13 @@ class Category
         return $query;
     }
 
-    // read limit
+
     public function readLimit()
     {
         try {
-            $sql = "select * from {$this->tblcategory} ";
+            $sql = "select * from {$this->tblCategory} ";
             $sql .= "order by category_is_active desc, ";
-            $sql .= "category_title asc ";
+            $sql .= "category_title ";
             $sql .= "limit :start, ";
             $sql .= ":total ";
             $query = $this->connection->prepare($sql);
@@ -83,16 +59,17 @@ class Category
         return $query;
     }
 
-
     public function search()
     {
         try {
-            $sql = "select * from {$this->tblrecipe} ";
-            $sql .= "where recipe_title like :recipe_title ";
-            $sql .= "order by recipe_is_active desc ";
+
+            $sql = "select * from {$this->tblCategory} ";
+            $sql .= "where category_title like :category_title ";
+            $sql .= "order by category_is_active desc, ";
+            $sql .= "category_title ";
             $query = $this->connection->prepare($sql);
             $query->execute([
-                "recipe_title" => "%{$this->recipe_search}%",
+                "category_title" => "%{$this->category_search}%",
             ]);
         } catch (PDOException $ex) {
             $query = false;
@@ -100,14 +77,49 @@ class Category
         return $query;
     }
 
+    public function filterActive()
+    {
+        try {
 
-    // read by id
+            $sql = "select * from {$this->tblCategory} ";
+            $sql .= "where category_is_active = :category_is_active ";
+            $sql .= "order by category_is_active desc, ";
+            $sql .= "category_title ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "category_is_active" => $this->category_is_active,
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
+    public function filterActiveSearch()
+    {
+        try {
+
+            $sql = "select * from {$this->tblCategory} ";
+            $sql .= "where category_is_active = :category_is_active ";
+            $sql .= "and category_title like :category_title ";
+            $sql .= "order by category_is_active desc, ";
+            $sql .= "category_title ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "category_is_active" => $this->category_is_active,
+                "category_title" => "%{$this->category_search}%",
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
     public function readById()
     {
         try {
-            $sql = "select * from {$this->tblcategory} ";
-            $sql .= "where category_aid  = :category_aid ";
-            $sql .= "order by category_is_active desc ";
+            $sql = "select * from {$this->tblCategory} ";
+            $sql .= "where category_aid = :category_aid ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "category_aid" => $this->category_aid,
@@ -118,18 +130,94 @@ class Category
         return $query;
     }
 
-   // update
+
+    public function create()
+    {
+        try {
+            $sql = "insert into {$this->tblCategory} ";
+            $sql .= "(category_is_active, ";
+            $sql .= "category_title, ";
+            $sql .= "category_created, ";
+            $sql .= "category_datetime ) values ( ";
+            $sql .= ":category_is_active, ";
+            $sql .= ":category_title, ";
+            $sql .= ":category_created, ";
+            $sql .= ":category_datetime ) ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "category_is_active" => $this->category_is_active,
+                "category_title" => $this->category_title,
+                "category_datetime" => $this->category_datetime,
+                "category_created" => $this->category_created,
+
+
+            ]);
+            $this->lastInsertedId = $this->connection->lastInsertId();
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
+
+    public function checkName()
+    {
+        try {
+            $sql = "select category_title from {$this->tblCategory} ";
+            $sql .= "where category_title = :category_title ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "category_title" => "{$this->category_title}",
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
+    public function checkAssociation()
+    {
+        try {
+            $sql = "select category_aid from {$this->tblCategory} ";
+            $sql .= "where category_aid = :category_aid ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "category_aid" => $this->category_aid,
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
+
     public function update()
     {
         try {
-            $sql = "update {$this->tblcategory} set ";
+            $sql = "update {$this->tblCategory} set ";
             $sql .= "category_title = :category_title, ";
             $sql .= "category_datetime = :category_datetime ";
-            $sql .= "where category_aid = :category_aid ";
+            $sql .= "where category_aid  = :category_aid ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "category_title" => $this->category_title,
                 "category_datetime" => $this->category_datetime,
+                "category_aid" => $this->category_aid
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
+
+    public function delete()
+    {
+        try {
+            $sql = "delete from {$this->tblCategory} ";
+            $sql .= "where category_aid = :category_aid ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
                 "category_aid" => $this->category_aid,
             ]);
         } catch (PDOException $ex) {
@@ -138,106 +226,19 @@ class Category
         return $query;
     }
 
-    // active
+
     public function active()
     {
         try {
-            $sql = "update {$this->tblcategory} set ";
+            $sql = "update {$this->tblCategory} set ";
             $sql .= "category_is_active = :category_is_active, ";
             $sql .= "category_datetime = :category_datetime ";
-            $sql .= "where category_aid = :category_aid ";
+            $sql .= "where category_aid  = :category_aid ";
             $query = $this->connection->prepare($sql);
             $query->execute([
                 "category_is_active" => $this->category_is_active,
                 "category_datetime" => $this->category_datetime,
                 "category_aid" => $this->category_aid,
-            ]);
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
-
-    // delete
-    public function delete()
-    {
-        try {
-            $sql = "delete from {$this->tblcategory} ";
-            $sql .= "where category_aid = :category_aid  ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "category_aid" => $this->category_aid,
-            ]);
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
-
-    // name
-    public function checkName()
-    {
-        try {
-            $sql = "select recipe_title from {$this->tblrecipe} ";
-            $sql .= "where recipe_title = :recipe_title ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "recipe_title" => "{$this->recipe_title}",
-            ]);
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
-
-    // // name
-    // public function checkAssociation()
-    // {
-    //     try {
-    //         $sql = "select product_recipe_id from {$this->tblrecipe} ";
-    //         $sql .= "where product_recipe_id = :product_recipe_id ";
-    //         $query = $this->connection->prepare($sql);
-    //         $query->execute([
-    //             "product_recipe_id" => $this->recipe_aid,
-    //         ]);
-    //     } catch (PDOException $ex) {
-    //         $query = false;
-    //     }
-    //     return $query;
-    // }
-
-
-    public function filterByStatus()
-    {
-        try {
-            $sql = "select * ";
-            $sql .= "from {$this->tblrecipe} ";
-            $sql .= "where recipe_is_active = :recipe_is_active  ";
-            $sql .= "order by recipe_is_active desc ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "recipe_is_active" => $this->recipe_is_active,
-            ]);
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
-
-    public function filterByStatusAndSearch()
-    {
-        try {
-            $sql = "select * ";
-            $sql .= "from {$this->tblrecipe} ";
-            $sql .= "where ";
-            $sql .= "recipe_is_active = :recipe_is_active ";
-            $sql .= "and recipe_title like :recipe_title ";
-            $sql .= "order by recipe_is_active desc, ";
-            $sql .= "recipe_title asc ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "recipe_title" => "%{$this->recipe_search}%",
-                "recipe_is_active" => $this->recipe_is_active,
             ]);
         } catch (PDOException $ex) {
             $query = false;

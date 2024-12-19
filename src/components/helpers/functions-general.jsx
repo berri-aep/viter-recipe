@@ -9,6 +9,14 @@ export const ver = "v2";
 export const devKey =
   "$2a$12$47wDvbLInZif/PVS8B6P3.7WxyJvUpBzZAWCsnWJUKq3nrn4qgmeO";
 
+// get focus on a button
+export const GetFocus = (id) => {
+  React.useEffect(() => {
+    const obj = document.getElementById(id);
+    obj.focus();
+  }, []);
+};
+
 export const fetchFormData = (url, fd = {}) => {
   console.log(fd);
   const data = fetch(url, {

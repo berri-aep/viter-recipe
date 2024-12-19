@@ -28,7 +28,7 @@ const Level = () => {
             <Header title="Level" subtitle="Manage Kiosk Level Items" />
             <div className="p-5">
               <div className="flex justify-between items-center">
-                <SearchBar />
+                <></>
                 <button className="btn btn-add" onClick={handleAdd}>
                   <Plus size={16} /> Add New
                 </button>

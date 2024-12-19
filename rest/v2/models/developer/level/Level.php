@@ -87,18 +87,59 @@ class Level
     public function search()
     {
         try {
-            $sql = "select * from {$this->tblrecipe} ";
-            $sql .= "where recipe_title like :recipe_title ";
-            $sql .= "order by recipe_is_active desc ";
+
+            $sql = "select * from {$this->tbllevel} ";
+            $sql .= "where level_title like :level_title ";
+            $sql .= "order by level_is_active desc, ";
+            $sql .= "level_title ";
             $query = $this->connection->prepare($sql);
             $query->execute([
-                "recipe_title" => "%{$this->recipe_search}%",
+                "level_title" => "%{$this->level_search}%",
             ]);
         } catch (PDOException $ex) {
             $query = false;
         }
         return $query;
     }
+
+    public function filterActive()
+    {
+        try {
+
+            $sql = "select * from {$this->tbllevel} ";
+            $sql .= "where level_is_active = :level_is_active ";
+            $sql .= "order by level_is_active desc, ";
+            $sql .= "level_title ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "level_is_active" => $this->level_is_active,
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
+    public function filterActiveSearch()
+    {
+        try {
+
+            $sql = "select * from {$this->tbllevel} ";
+            $sql .= "where level_is_active = :level_is_active ";
+            $sql .= "and level_title like :level_title ";
+            $sql .= "order by level_is_active desc, ";
+            $sql .= "level_title ";
+            $query = $this->connection->prepare($sql);
+            $query->execute([
+                "level_is_active" => $this->level_is_active,
+                "level_title" => "%{$this->level_search}%",
+            ]);
+        } catch (PDOException $ex) {
+            $query = false;
+        }
+        return $query;
+    }
+
 
 
     // read by id
@@ -178,11 +219,11 @@ class Level
     public function checkName()
     {
         try {
-            $sql = "select recipe_title from {$this->tblrecipe} ";
-            $sql .= "where recipe_title = :recipe_title ";
+            $sql = "select level_title from {$this->tbllevel} ";
+            $sql .= "where level_title = :level_title ";
             $query = $this->connection->prepare($sql);
             $query->execute([
-                "recipe_title" => "{$this->recipe_title}",
+                "level_title" => "{$this->level_title}",
             ]);
         } catch (PDOException $ex) {
             $query = false;
@@ -207,41 +248,4 @@ class Level
     // }
 
 
-    public function filterByStatus()
-    {
-        try {
-            $sql = "select * ";
-            $sql .= "from {$this->tblrecipe} ";
-            $sql .= "where recipe_is_active = :recipe_is_active  ";
-            $sql .= "order by recipe_is_active desc ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "recipe_is_active" => $this->recipe_is_active,
-            ]);
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
-
-    public function filterByStatusAndSearch()
-    {
-        try {
-            $sql = "select * ";
-            $sql .= "from {$this->tblrecipe} ";
-            $sql .= "where ";
-            $sql .= "recipe_is_active = :recipe_is_active ";
-            $sql .= "and recipe_title like :recipe_title ";
-            $sql .= "order by recipe_is_active desc, ";
-            $sql .= "recipe_title asc ";
-            $query = $this->connection->prepare($sql);
-            $query->execute([
-                "recipe_title" => "%{$this->recipe_search}%",
-                "recipe_is_active" => $this->recipe_is_active,
-            ]);
-        } catch (PDOException $ex) {
-            $query = false;
-        }
-        return $query;
-    }
 }

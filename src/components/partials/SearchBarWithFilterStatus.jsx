@@ -1,7 +1,7 @@
 import React from "react";
-import { FaSearch } from "react-icons/fa";
-import { setError, setIsSearch, setMessage } from "../../store/StoreAction";
+import { FaList, FaSearch } from "react-icons/fa";
 import { MdOutlineSearch } from "react-icons/md";
+import { setError, setIsSearch, setMessage } from "../store/storeAction";
 
 const SearchBarWithFilterStatus = ({
   search,
@@ -11,15 +11,14 @@ const SearchBarWithFilterStatus = ({
   isFetching,
   setOnSearch,
   onSearch,
-  isFilter = false,
+  statusFilter,
+  setStatusFilter,
+  setIsFilter,
 }) => {
   const handleChange = (e) => {
     if (e.target.value === "") {
       setOnSearch(!onSearch);
       dispatch(setIsSearch(false));
-    }
-    if (isFilter === true) {
-      dispatch(setIsSearch(true));
     }
   };
 
@@ -38,31 +37,61 @@ const SearchBarWithFilterStatus = ({
     }
   };
 
+  const handleChangeStatus = (e, setStatusFilter) => {
+    search.current.value = "";
+    setStatusFilter(e.target.value);
+    setIsFilter(false);
+    if (e.target.value !== "") {
+      setIsFilter(true);
+      dispatch(setIsSearch(false));
+    }
+  };
+
+  const resultCount = result?.pages[0]?.total
+    ? result?.pages[0]?.total
+    : result?.pages[0]?.count;
+
   return (
     <form
       onSubmit={(e) => {
         handleSubmit(e);
       }}
-      className="search-box"
+      className="search-box flex items-center gap-4 "
     >
-      <div className="search flex items-center relative">
-        <div
-          type="submit"
-          className="absolute pointer-events-none cursor-default left-0 btn-action-table border-0 text-[16px] py-[5px] border-l-0 text-gray-300 border-gray-300 hover:bg-[unset]"
-        >
-          <FaSearch />
+      <div className="flex w-full items-center justify-between mt-10">
+        <div className="flex items-center gap-4">
+          <select
+            value={statusFilter}
+            onChange={(e) => handleChangeStatus(e, setStatusFilter)}
+            className="p-1.5 bg-secondary border border-line rounded-md outline-none placeholder:opacity-30 placeholder:text-sm focus:border-accent w-fit h-[34px] cursor-pointer"
+          >
+            <optgroup label="Select a Status">
+              <option value="">All</option>
+              <option value="1">Active</option>
+              <option value="0">inActive</option>
+            </optgroup>
+          </select>
+          <p className="leading-none flex items-center gap-2">
+            <FaList /> <span>{isFetching ? "Searching..." : resultCount}</span>
+          </p>
         </div>
+      </div>
+      <div className="search relative">
         <input
+          id="search"
           type="search"
-          placeholder="Search here..."
-          className="text-xs py-[0px] h-[35px] "
+          placeholder="Search here . . ."
           ref={search}
           onChange={(e) => handleChange(e)}
+          className="p-1.5 bg-secondary border border-line rounded-md outline-none pl-8 placeholder:opacity-30 placeholder:text-sm w-[250px] focus:border-accent"
         />
-        <div className="search-icon">
+        <div className="search-icon absolute left-2 top-2.5">
           <MdOutlineSearch />
         </div>
       </div>
+      {/* {store.isSearch && (
+
+      )}         */}
     </form>
   );
 };
