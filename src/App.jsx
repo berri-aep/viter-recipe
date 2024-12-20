@@ -7,6 +7,7 @@ import Single from "./components/pages/frontend/single/Single";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Category from "./components/pages/backend/category/Category";
 import Level from "./components/pages/backend/level/Level";
+import Dashboard from "./components/pages/backend/dashboard/Dashboard";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -15,6 +16,7 @@ const App = () => {
       <StoreProvider>
         <Router>
           <Routes>
+            <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/recipe" element={<Recipe />} />
             <Route path="/admin/category" element={<Category/>} />
             <Route path="/admin/level" element={<Level/>} />

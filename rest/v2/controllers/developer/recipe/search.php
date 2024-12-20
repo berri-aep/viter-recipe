@@ -5,7 +5,7 @@ require '../../../core/header.php';
 require '../../../core/functions.php';
 require 'functions.php';
 // use needed classes
-require '../../../models/developer/recipe/Recipe.php';
+require '../../../models/developer/Recipe.php';
 
 // check database connection
 $conn = null;
@@ -24,9 +24,9 @@ if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
     $recipe->recipe_search = $data['searchValue'];
 
     http_response_code(200);
-    if($data['isFilter']){
-        $recipe->recipe_is_active = checkIndex($data , 'statusFilter');
-        if($recipe->recipe_search != ''){
+    if ($data['isFilter']) {
+        $recipe->recipe_is_active = checkIndex($data, 'statusFilter');
+        if ($recipe->recipe_search != '') {
             $query = checkFilterActiveSearch($recipe);
             getQueriedData($query);
         }

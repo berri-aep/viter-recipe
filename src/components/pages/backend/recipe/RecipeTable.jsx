@@ -164,7 +164,7 @@ const RecipeTable = ({ setItemEdit }) => {
                       <tr key={key}>
                         <td>{counter++}.</td>
                         <td>
-                          {item.category_is_active === 1 ? (
+                          {item.recipe_is_active === 1 ? (
                             <Status text="Active" />
                           ) : (
                             <Status text="inActive" />

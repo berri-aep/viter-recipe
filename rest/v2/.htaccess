@@ -17,6 +17,7 @@ RewriteRule ^recipe/([0-9]+)$ controllers/developer/recipe/recipe.php?recipeid=$
 RewriteRule ^recipe/active/([0-9]+)$ controllers/developer/recipe/active.php?recipeid=$1 [L]
 RewriteRule ^recipe/search$ controllers/developer/recipe/search.php [L]
 RewriteRule ^recipe/page/([0-9]+)$ controllers/developer/recipe/page.php?start=$1 [L]
+RewriteRule ^recipe/read-recipe-by-category$ controllers/developer/recipe/read-recipe-by-category.php [L]
 
 ### Category ###
 RewriteRule ^category$ controllers/developer/category/category.php [L]
