@@ -2,7 +2,7 @@ import { ChevronDown, Dot } from "lucide-react";
 import React from "react";
 import IconNoData from "../partials/IconNoData";
 
-const DashboardAccordion = ({ item, recipeItem, title }) => {
+const DashboardAccordion = ({ item, recipeItem, levelData }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   // const getCardDetails = menus.filter(

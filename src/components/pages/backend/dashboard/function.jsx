@@ -50,12 +50,13 @@ export const getCategory = (dataCategory, dataRecipe) => {
 
 export const getLevel = (dataCategory, dataLevel, dataRecipe) => {
   let resultLevel = [];
-  let resultCategory = [];
   let resultLevelId = [];
   let resultCategoryId = [];
 
   dataCategory?.data.map((categoryItem) => {
+    
     resultLevel.push(categoryItem);
+    resultCategoryId.push(categoryItem.category_aid);
   });
 
   dataLevel?.data.map((levelItem) => {
@@ -65,10 +66,23 @@ export const getLevel = (dataCategory, dataLevel, dataRecipe) => {
         [getLevelName]: 0,
       };
       resultLevel[key] = { ...resultLevel[key], ...object };
+      resultLevelId[levelItem.level_aid] = levelItem.level_title.toLowerCase();
     });
   });
   dataRecipe?.data.map((recipeItem) => {
+    const recipeLevelId = recipeItem.recipe_level_id;
+    const recipeCategoryId = recipeItem.recipe_category_id;
     
+    const levelName = resultLevelId[recipeLevelId];
+
+    resultLevel.map((category) => {
+      if (category.category_aid === recipeCategoryId && levelName) {
+        if (category[levelName] !== undefined) {
+          category[levelName] += 1;
+        }
+      }
+    });
+
   });
   return resultLevel;
 };

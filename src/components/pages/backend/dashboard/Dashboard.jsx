@@ -7,6 +7,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Legend,
   Rectangle,
   ResponsiveContainer,
   Tooltip,
@@ -82,53 +83,28 @@ const Dashboard = () => {
                       <TableLoader cols={1} count={15} />
                     ) : (
                       <>
-                        <ResponsiveContainer width={"100%"} height={340}>
-                          <h3>Total Recipe</h3>
-                          <BarChart
-                            width={200}
-                            height={500}
-                            // data={menus.slice(0, 10)}
-                            data={tableData.slice(0, 10)}
-                            margin={{
-                              top: 20,
-                              right: 30,
-                              left: 20,
-                              bottom: 5,
-                            }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="category_title" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar
-                              dataKey="recipe_level"
-                              fill="#8884d8"
-                              barSize={70}
-                              stackId="a"
-                              activeBar={
-                                <Rectangle fill="pink" stroke="purple" />
-                              }
-                            />
-                            <Bar
-                              dataKey="recipe_level"
-                              fill="#0000FF"
-                              barSize={70}
-                              stackId="a"
-                              activeBar={
-                                <Rectangle fill="pink" stroke="purple" />
-                              }
-                            />
-                            <Bar
-                              dataKey="recipe_level"
-                              fill="#880808"
-                              barSize={70}
-                              stackId="a"
-                              activeBar={
-                                <Rectangle fill="pink" stroke="purple" />
-                              }
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        <ResponsiveContainer width="100%" height={340}>
+        <BarChart
+          width={500}
+          height={300}
+          data={levelData.slice(0, 10)}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="category_title" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="easy" stackId="a" fill="#7FFFD4"  barSize={70} />
+          <Bar dataKey="moderate" stackId="a" fill="#89CFF0"  barSize={70} />
+          <Bar dataKey="difficult" stackId="a" fill="#880808" barSize={70} />
+        </BarChart>
+      </ResponsiveContainer>
                       </>
                     )}
                   </div>
@@ -164,11 +140,13 @@ const Dashboard = () => {
                           (recipeItem) =>
                             recipeItem.recipe_category_id == item.category_aid
                         );
+                        
                         return (
                           <DashboardAccordion
                             item={item}
                             key={key}
                             recipeItem={recipeItem}
+                            levelData={levelData}
                           />
                         );
                       })}
